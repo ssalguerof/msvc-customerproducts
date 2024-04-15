@@ -1,6 +1,7 @@
 package org.bank.ssalguerof.msvc.customerproducts.controllers;
 
 import org.bank.ssalguerof.msvc.customerproducts.models.documents.CustomerProduct;
+import org.bank.ssalguerof.msvc.customerproducts.models.documents.Transaction;
 import org.bank.ssalguerof.msvc.customerproducts.models.services.CustomerProductService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,4 +35,14 @@ public class CustomerProductController {
                     return  customerProductService.save(existingProduct);
                 });
     }
+
+    @PutMapping("/transaction/{idCustomerProd}")
+    public Mono<CustomerProduct> updateProductTransaction(@RequestBody Transaction transaction, @PathVariable String idCustomerProd){
+
+        return customerProductService.findbyId(idCustomerProd)
+                .flatMap(existingProduct->{
+                    return  customerProductService.updateProductTransaction(idCustomerProd, transaction);
+                });
+    }
+
 }

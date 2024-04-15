@@ -2,6 +2,9 @@ package org.bank.ssalguerof.msvc.customerproducts.models.services;
 
 import org.bank.ssalguerof.msvc.customerproducts.models.dao.CustomerProductDao;
 import org.bank.ssalguerof.msvc.customerproducts.models.documents.CustomerProduct;
+import org.bank.ssalguerof.msvc.customerproducts.models.documents.Transaction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -16,6 +19,8 @@ import static org.bank.ssalguerof.msvc.customerproducts.utils.Constantes.*;
 public class CustomerProductServiceImpl implements CustomerProductService{
     @Autowired
     private CustomerProductDao customerProductDao;
+    private static final Logger log = LoggerFactory.getLogger(CustomerProductServiceImpl.class);
+
     @Override
     public Flux<CustomerProduct> findAll() {
         return customerProductDao.findAll();
@@ -94,5 +99,84 @@ public class CustomerProductServiceImpl implements CustomerProductService{
         return customerProductDao.delete(customerProduct);
     }
 
+    /*
+    * funcion que permite agregar una transaccion en un producto
+    * */
+    @Override
+    public Mono<CustomerProduct> updateProductTransaction(String idCustomerProd, Transaction transaction) {
+
+        return customerProductDao.findById(idCustomerProd)
+                .flatMap(customerProduct -> {
+                    customerProduct.getListaTransactions().add(transaction);
+
+                    /*
+                    * Actualizamos los saldos del producto según el movimiento realizado
+                    * */
+
+                    if(transaction.getCodTipoMovimiento().equals(COD_TRANS_DEPOCTA) && customerProduct.getCodProducto().equals(COD_CTAAHORRO)){
+                        customerProduct.getDatosCuentaAhorro().setSaldo( customerProduct.getDatosCuentaAhorro().getSaldo()+transaction.getMonto());
+                    }
+                    if(transaction.getCodTipoMovimiento().equals(COD_TRANS_DEPOCTA) && customerProduct.getCodProducto().equals(COD_CTACORRIENTE)){
+                        customerProduct.getDatosCuentaCorriente().setSaldo( customerProduct.getDatosCuentaCorriente().getSaldo()+transaction.getMonto());
+                    }
+                    if(transaction.getCodTipoMovimiento().equals(COD_TRANS_DEPOCTA) && customerProduct.getCodProducto().equals(COD_CTAPLAZOFIJO)){
+                        customerProduct.getDatosPlazoFijo().setMonto(customerProduct.getDatosPlazoFijo().getMonto()+transaction.getMonto());
+                    }
+
+                    if(transaction.getCodTipoMovimiento().equals(COD_TRANS_RETICTA) && customerProduct.getCodProducto().equals(COD_CTAAHORRO)){
+                        /*Validamos que se tenga saldo en la cuenta para poder realizar un retiro*/
+                        if(transaction.getMonto()>customerProduct.getDatosCuentaAhorro().getSaldo()){
+                            return Mono.error(new RuntimeException("El Monto de la transferencia es mayor al saldo de la cuenta"));
+                        }else{
+                            customerProduct.getDatosCuentaAhorro().setSaldo( customerProduct.getDatosCuentaAhorro().getSaldo()-transaction.getMonto());
+                        }
+                    }
+                    if(transaction.getCodTipoMovimiento().equals(COD_TRANS_RETICTA) && customerProduct.getCodProducto().equals(COD_CTACORRIENTE)){
+                        /*Validamos que se tenga saldo en la cuenta para poder realizar un retiro*/
+                        if(transaction.getMonto()>customerProduct.getDatosCuentaCorriente().getSaldo()){
+                            return Mono.error(new RuntimeException("El Monto de la transferencia es mayor al saldo de la cuenta"));
+                        }else {
+                            customerProduct.getDatosCuentaCorriente().setSaldo( customerProduct.getDatosCuentaCorriente().getSaldo()-transaction.getMonto());
+                        }
+                    }
+                    if(transaction.getCodTipoMovimiento().equals(COD_TRANS_RETICTA) && customerProduct.getCodProducto().equals(COD_CTAPLAZOFIJO)){
+                        /*Validamos que se tenga saldo en la cuenta para poder realizar un retiro*/
+                        if(transaction.getMonto()>customerProduct.getDatosPlazoFijo().getMonto()){
+                            return Mono.error(new RuntimeException("El Monto de la transferencia es mayor al saldo de la cuenta"));
+                        }else{
+                            customerProduct.getDatosPlazoFijo().setMonto(customerProduct.getDatosPlazoFijo().getMonto()-transaction.getMonto());
+                        }
+                    }
+
+
+                    if(transaction.getCodTipoMovimiento().equals(COD_TRANS_PAGOCREDITO) && customerProduct.getCodProducto().equals(COD_CTOPERSONAL)){
+                        customerProduct.getDatosCreditoPersonal().setCuotasPagadas(customerProduct.getDatosCreditoPersonal().getCuotasPagadas()+1);
+                        customerProduct.getDatosCreditoPersonal().setSaldoPendiente(customerProduct.getDatosCreditoPersonal().getSaldoPendiente()- transaction.getMonto());
+                    }
+                    if(transaction.getCodTipoMovimiento().equals(COD_TRANS_PAGOCREDITO) && customerProduct.getCodProducto().equals(COD_CTOEMPRESARIAL)){
+                        customerProduct.getDatosCreditoEmpresarial().setCuotasPagadas( customerProduct.getDatosCreditoEmpresarial().getCuotasPagadas()+1);
+                        customerProduct.getDatosCreditoEmpresarial().setSaldoPendiente( customerProduct.getDatosCreditoEmpresarial().getSaldoPendiente()- transaction.getMonto());
+                    }
+                    if(transaction.getCodTipoMovimiento().equals(COD_TRANS_PAGOCREDITO) && customerProduct.getCodProducto().equals(COD_TARJCREDITO)){
+                        customerProduct.getDatosTarjetaCredito().setSaldoUtilizado(customerProduct.getDatosTarjetaCredito().getSaldoUtilizado()-transaction.getMonto());
+                    }
+
+
+                    if(transaction.getCodTipoMovimiento().equals(COD_TRANS_CARGACONSUMO) && customerProduct.getCodProducto().equals(COD_TARJCREDITO)){
+                        /*Validamos que se tenga saldo en la linea de credito de la tarjeta*/
+                         Double montoDisponible = customerProduct.getDatosTarjetaCredito().getLimiteCredito() - customerProduct.getDatosTarjetaCredito().getSaldoUtilizado();
+                        if(transaction.getMonto()>montoDisponible){
+                            return Mono.error(new RuntimeException("El Monto de la transferencia es mayor al saldo de la linea de credito disponible"));
+                        }else{
+                            customerProduct.getDatosTarjetaCredito().setSaldoUtilizado(customerProduct.getDatosTarjetaCredito().getSaldoUtilizado()+transaction.getMonto());
+                        }
+                    }
+                    return customerProductDao.save(customerProduct);
+                })
+                .doOnSuccess(productoActualizado -> {
+                    // Maneja la respuesta del producto actualizado
+                    log.info("Se agregó un nuevo movimiento al producto: " + productoActualizado.getId());
+                });
+    }
 
 }

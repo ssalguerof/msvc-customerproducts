@@ -33,5 +33,6 @@ public class CustomerProduct {
     private CreditData datosCreditoPersonal;
     private CreditCardData datosTarjetaCredito;
     private List<Customer> listaTitulares;
+    private List<Transaction> listaTransactions;
 
 }

@@ -25,7 +25,14 @@ public class Constantes {
     public static List<String> PRODUCTS_CTA_PERSONAL = Arrays.asList("CTAAHO", "CTACOR", "CTAPLZ");
     public static List<String> PRODUCTS_CLIENTE_EMPRESARIAL = Arrays.asList("CTACOR","CREEMP","CRETAR");
 
+    //mapeamos los movimimientos permitidos por cada producto
 
+    public static List<String> TRANSACTIONS_CTAAHO_CTACOR_CTAPLZ = Arrays.asList("DEPCTA","RETCTA");
+    public static List<String> TRANSACTIONS_CREPER_CREEMP_CRETAR = Arrays.asList("PAGOCR");
+    public static List<String> TRANSACTIONS_CRETAR = Arrays.asList("CARGAC");
 
-
+    public static final String COD_TRANS_DEPOCTA="DEPCTA";
+    public static final String COD_TRANS_RETICTA="RETCTA";
+    public static final String COD_TRANS_PAGOCREDITO="PAGOCR";
+    public static final String COD_TRANS_CARGACONSUMO="CARGAC";
 }
