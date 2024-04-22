@@ -71,6 +71,11 @@ public class CustomerProductServiceImpl implements CustomerProductService {
   }
 
   @Override
+  public Flux<CustomerProduct> findbyClienteId(String clienteId) {
+    return customerProductDao.findByClienteId(clienteId);
+  }
+
+  @Override
   public Mono<CustomerProduct> save(CustomerProduct customerProduct) {
     //Validamos para persona natural:
     //Un cliente personal solo puede tener un máximo de una cuenta de ahorro, una cuenta

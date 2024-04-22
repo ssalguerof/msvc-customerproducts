@@ -1,8 +1,13 @@
 package org.bank.ssalguerof.msvc.customerproducts.controllers;
 
+import java.time.LocalDate;
+import java.util.Date;
 import org.bank.ssalguerof.msvc.customerproducts.models.documents.CustomerProduct;
 import org.bank.ssalguerof.msvc.customerproducts.models.documents.Transaction;
+import org.bank.ssalguerof.msvc.customerproducts.models.reports.ReportProductCommission;
+import org.bank.ssalguerof.msvc.customerproducts.models.reports.ReportProducts;
 import org.bank.ssalguerof.msvc.customerproducts.models.services.CustomerProductService;
+import org.bank.ssalguerof.msvc.customerproducts.models.services.ReportProductsService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,6 +29,9 @@ import reactor.core.publisher.Mono;
 public class CustomerProductController {
   @Autowired
   private CustomerProductService customerProductService;
+
+  @Autowired
+  private ReportProductsService reportProductsService;
 
   @GetMapping
   public Flux<CustomerProduct> findAll() {
@@ -82,5 +90,16 @@ public class CustomerProductController {
 
     return customerProductService.transferProductTransaction(ctaOrigen, ctaDestino, transaction);
 
+  }
+
+  @GetMapping("/reporte/{clienteId}")
+  public Mono<ReportProducts> generateReportAverage(@PathVariable String clienteId) {
+    return reportProductsService.generateReportAverage(clienteId, new Date());
+  }
+
+  @GetMapping("/reportcommission/{clienteId}")
+  public Mono<ReportProductCommission> generateReportCommission(@PathVariable String clienteId) {
+    LocalDate currentDate = LocalDate.now();
+    return reportProductsService.generateReportCommission(clienteId, currentDate);
   }
 }

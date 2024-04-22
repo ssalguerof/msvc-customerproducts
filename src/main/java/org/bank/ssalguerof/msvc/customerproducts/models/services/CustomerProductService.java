@@ -15,6 +15,8 @@ public interface CustomerProductService {
 
   public Mono<CustomerProduct> findbyNumCuenta(String numCuenta);
 
+  public Flux<CustomerProduct> findbyClienteId(String clienteId);
+
   public Mono<CustomerProduct> save(CustomerProduct customerProduct);
 
   public Mono<Void> delete(CustomerProduct customerProduct);
