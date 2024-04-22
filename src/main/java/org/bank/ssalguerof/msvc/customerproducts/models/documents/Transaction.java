@@ -16,4 +16,8 @@ public class Transaction {
   private String descTipoMovimiento;
   private Double monto;
   private Date fecRegistro;
+  private String codTransferencia;
+  private String desTransferencia;
+  // Indicador si la transacción corresponde al origen de la transacción para aplicar una comisión.
+  private String indOrigenTransaccion;
 }

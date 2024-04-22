@@ -13,10 +13,22 @@ public interface CustomerProductService {
 
   public Mono<CustomerProduct> findbyId(String id);
 
+  public Mono<CustomerProduct> findbyNumCuenta(String numCuenta);
+
   public Mono<CustomerProduct> save(CustomerProduct customerProduct);
 
   public Mono<Void> delete(CustomerProduct customerProduct);
 
   public Mono<CustomerProduct> updateProductTransaction(String idCustomerProd,
                                                         Transaction transaction);
+
+  public Mono<CustomerProduct> transferProductTransaction(String numCtaOrigen,
+                                              String numCtaDestino, Transaction transaction);
+
+  public Double getSaldoProductoCliente(CustomerProduct customerProduct);
+
+  public Boolean validarComisionTransaccion(CustomerProduct customerProduct,
+                                            Transaction transaction);
+
+
 }

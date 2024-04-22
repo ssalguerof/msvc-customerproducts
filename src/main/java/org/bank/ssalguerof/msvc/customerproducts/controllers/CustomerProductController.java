@@ -35,6 +35,11 @@ public class CustomerProductController {
     return customerProductService.findbyId(id);
   }
 
+  @GetMapping("/cuenta/{numCuenta}")
+  public Mono<CustomerProduct> findByNumCuenta(@PathVariable String numCuenta) {
+    return customerProductService.findbyNumCuenta(numCuenta);
+  }
+
   @PostMapping
   public Mono<CustomerProduct> saveProduct(@RequestBody CustomerProduct customerProduct) {
     return customerProductService.save(customerProduct);
@@ -57,8 +62,8 @@ public class CustomerProductController {
    */
   @PutMapping("/transaction/{idCustomerProd}")
   public Mono<CustomerProduct> updateProductTransaction(
-          @RequestBody Transaction transaction,
-          @PathVariable String idCustomerProd) {
+      @RequestBody Transaction transaction,
+      @PathVariable String idCustomerProd) {
 
     return customerProductService.findbyId(idCustomerProd)
       .flatMap(existingProduct -> {
@@ -66,4 +71,16 @@ public class CustomerProductController {
       });
   }
 
+  /**
+   * Método encargado de realizar una transferencia entre dos productos de clientes.
+   */
+  @PutMapping("/transference/{ctaOrigen}/{ctaDestino}")
+  public Mono<CustomerProduct> transferProductTransaction(
+      @RequestBody Transaction transaction,
+      @PathVariable String ctaOrigen,
+      @PathVariable String ctaDestino) {
+
+    return customerProductService.transferProductTransaction(ctaOrigen, ctaDestino, transaction);
+
+  }
 }

@@ -4,6 +4,7 @@ import java.util.List;
 import org.bank.ssalguerof.msvc.customerproducts.models.documents.CustomerProduct;
 import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 /**
  * Interfaz que define métodos para consultar y manipular la información de CustomerProduct
@@ -19,4 +20,5 @@ public interface CustomerProductDao extends ReactiveMongoRepository<CustomerProd
   Flux<CustomerProduct> findByClienteIdAndCodTipoClienteAndCodProductoIn(
                         String clienteId, String codTipoCliente, List<String> codProductos);
 
+  Mono<CustomerProduct> findByNumCuenta(String numCuenta);
 }

@@ -12,4 +12,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class AccountData {
   private Double saldo;
+  private Integer numMovRealizados; //numeros de movimientos realizados
 }
