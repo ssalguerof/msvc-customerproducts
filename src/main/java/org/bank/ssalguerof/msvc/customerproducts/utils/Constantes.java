@@ -26,14 +26,30 @@ public class Constantes {
   public static final String COD_CTAAHORROVIP = "CTAVIP";
   public static final String COD_CTAMYPE = "CTAMYP";
 
+  // Descripción de productos
+  public static final String DESC_CTAAHORRO = "Cuenta de Ahorro";
+  public static final String DESC_CTACORRIENTE = "Cuenta Corriente";
+  public static final String DESC_CTAPLAZOFIJO = "Cuenta Plazo Fijo";
+  public static final String DESC_CTOPERSONAL = "Crédito Personal";
+  public static final String DESC_CTOEMPRESARIAL = "Crédito Empresarial";
+  public static final String DESC_TARJCREDITO = "Tarjeta de Crédito";
+  public static final String DESC_CTAAHORROVIP = "Cuenta de Ahorro VIP";
+  public static final String DESC_CTAMYPE = "Cuenta MYPE";
+
 
   // Listas de productos por tipo de cliente
   public static List<String> PRODUCTS_CLIENTE_PERSONAL = Arrays.asList("CTAAHO", "CTACOR",
-                                          "CTAPLZ", "CREPER", "CRETAR", "CTAVIP", "CTAVIP");
-  public static List<String> PRODUCTS_CTA_PERSONAL = Arrays.asList("CTAAHO", "CTACOR", "CTAPLZ",
-                                                      "CTAVIP");
+                                          "CTAPLZ", "CREPER", "CRETAR", "CTAVIP");
+
   public static List<String> PRODUCTS_CLIENTE_EMPRESARIAL = Arrays.asList("CTACOR", "CREEMP",
-                                                            "CRETAR", "CTAMYP", "CTAMYP");
+                                                            "CRETAR", "CTAMYP");
+
+  public static List<String> PRODUCTS_CTA_PERSONAL = Arrays.asList("CTAAHO", "CTACOR", "CTAPLZ",
+      "CTAVIP");
+
+  public static List<String> PASSIVE_PRODUCTS_PERSONAL = Arrays.asList("CREPER", "CRETAR");
+
+  public static List<String> PASSIVE_PRODUCTS_EMPRESARIAL = Arrays.asList("CREEMP", "CRETAR");
 
   // Mapeo de transacciones permitidas por cada tipo de producto
 
@@ -61,18 +77,42 @@ public class Constantes {
   public static final String COD_TRANS_BANCARIA_CUENTAS = "TRBANCTA";
   public static final String COD_TRANS_BANCARIA_TERCEROS = "TRBANTER";
   public static final String COD_TRANS_COBRO_COMISION = "TRCOBCOM";
+  public static final String COD_TRANS_TARJETA_RETIRO = "TRTARRET";
+  public static final String COD_TRANS_TARJETA_PAGO = "TRTARPAG";
 
-  //Códigos de Transferencias
+  //Descripcion de Transferencias
   public static final String DES_TRANS_DEPOSITO_BANCO = "Depósito en banco";
   public static final String DES_TRANS_DEPOSITO_CAJERO = "Depósito en cajero automático";
   public static final String DES_TRANS_PAGO_SERVICIOS = "Pago de servicios";
   public static final String DES_TRANS_BANCARIA_CUENTAS = "Transferencia bancaria entre cuentas";
   public static final String DES_TRANS_BANCARIA_TERCEROS = "Transferencia bancaria terceros";
   public static final String DES_TRANS_COBRO_COMISION = "Cobro de comisión";
+  public static final String DES_TRANS_TARJETA_RETIRO = "Retiro con Tarjeta";
+  public static final String DES_TRANS_TARJETA_PAGO = "Pago con Tarjeta";
+
+  //Código Transacciones Tarjeta
+  public static final String COD_TRANS_TARJ_COMPRA = "TRANSCOMPTARJ";
+  public static final String COD_TRANS_TARJ_RETIRO = "TRANSRETITARJ";
+  public static final String COD_TRANS_TARJ_PAGO = "TRANSPAGOTARJ";
+  //Descripción Transacciones con Tarjeta
+  public static final String DES_TRANS_TARJ_COMPRA = "Compra con Tarjeta";
+  public static final String DES_TRANS_TARJ_RETIRO = "Retiro con Tarjeta";
+  public static final String DES_TRANS_TARJ_PAGO = "Pago con Tarjeta";
+  //Codigo estado transacción tarjeta
+  public static final String COD_ESTADO_TRANS_PENDIENTE = "ESTPEND";
+  public static final String COD_ESTADO_TRANS_AUTORIZADA = "ESTAUTO";
+  public static final String COD_ESTADO_TRANS_COMPLETA = "ESTCOMP";
+
 
   //Lista de Transacciones entre cuentas
   public static List<String> TRANSACTIONS_CTAS = Arrays.asList("TRBANCTA", "TRBANTER");
 
   public static Integer CANT_MAX_TRANS = 3;
   public static Double MONTO_COMISION = 9.5;
+
+  public static String IND_TIENE_DEUDA = "1";
+
+  //Indicadores para decir si la cuenta es la originaria de la transacción
+  public static String IND_ORIGEN_TRANS_SI = "1";
+  public static String IND_ORIGEN_TRANS_NO = "0";
 }

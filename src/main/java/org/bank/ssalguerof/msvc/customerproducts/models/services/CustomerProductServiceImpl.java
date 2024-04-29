@@ -2,48 +2,23 @@ package org.bank.ssalguerof.msvc.customerproducts.models.services;
 
 
 
-import static org.bank.ssalguerof.msvc.customerproducts.utils.Constantes.CANT_MAX_TRANS;
-import static org.bank.ssalguerof.msvc.customerproducts.utils.Constantes.COD_CTAAHORRO;
-import static org.bank.ssalguerof.msvc.customerproducts.utils.Constantes.COD_CTAAHORROVIP;
-import static org.bank.ssalguerof.msvc.customerproducts.utils.Constantes.COD_CTACORRIENTE;
-import static org.bank.ssalguerof.msvc.customerproducts.utils.Constantes.COD_CTAMYPE;
-import static org.bank.ssalguerof.msvc.customerproducts.utils.Constantes.COD_CTAPLAZOFIJO;
-import static org.bank.ssalguerof.msvc.customerproducts.utils.Constantes.COD_CTOEMPRESARIAL;
-import static org.bank.ssalguerof.msvc.customerproducts.utils.Constantes.COD_CTOPERSONAL;
-import static org.bank.ssalguerof.msvc.customerproducts.utils.Constantes.COD_MOV_CARGACONSUMO;
-import static org.bank.ssalguerof.msvc.customerproducts.utils.Constantes.COD_MOV_DEPOCTA;
-import static org.bank.ssalguerof.msvc.customerproducts.utils.Constantes.COD_MOV_PAGOCREDITO;
-import static org.bank.ssalguerof.msvc.customerproducts.utils.Constantes.COD_MOV_RETICTA;
-import static org.bank.ssalguerof.msvc.customerproducts.utils.Constantes.COD_TARJCREDITO;
-import static org.bank.ssalguerof.msvc.customerproducts.utils.Constantes.COD_TIPOPERSONA_EMPR;
-import static org.bank.ssalguerof.msvc.customerproducts.utils.Constantes.COD_TIPOPERSONA_PERS;
-import static org.bank.ssalguerof.msvc.customerproducts.utils.Constantes.COD_TIPOPRODUCTO_ACTIVO;
-import static org.bank.ssalguerof.msvc.customerproducts.utils.Constantes.COD_TIPOPRODUCTO_PASIVO;
-import static org.bank.ssalguerof.msvc.customerproducts.utils.Constantes.COD_TRANS_COBRO_COMISION;
-import static org.bank.ssalguerof.msvc.customerproducts.utils.Constantes.DESC_MOV_CARGACONSUMO;
-import static org.bank.ssalguerof.msvc.customerproducts.utils.Constantes.DESC_MOV_DEPOCTA;
-import static org.bank.ssalguerof.msvc.customerproducts.utils.Constantes.DESC_MOV_PAGOCREDITO;
-import static org.bank.ssalguerof.msvc.customerproducts.utils.Constantes.DESC_MOV_RETICTA;
-import static org.bank.ssalguerof.msvc.customerproducts.utils.Constantes.DES_TRANS_BANCARIA_CUENTAS;
-import static org.bank.ssalguerof.msvc.customerproducts.utils.Constantes.DES_TRANS_BANCARIA_TERCEROS;
-import static org.bank.ssalguerof.msvc.customerproducts.utils.Constantes.DES_TRANS_COBRO_COMISION;
-import static org.bank.ssalguerof.msvc.customerproducts.utils.Constantes.MONTO_COMISION;
-import static org.bank.ssalguerof.msvc.customerproducts.utils.Constantes.PRODUCTS_CLIENTE_EMPRESARIAL;
-import static org.bank.ssalguerof.msvc.customerproducts.utils.Constantes.PRODUCTS_CLIENTE_PERSONAL;
-import static org.bank.ssalguerof.msvc.customerproducts.utils.Constantes.PRODUCTS_CTA_PERSONAL;
-import static org.bank.ssalguerof.msvc.customerproducts.utils.Constantes.TRANSACTIONS_CTAS;
+import java.util.*;
 
-import java.util.Arrays;
-import java.util.Date;
 import org.bank.ssalguerof.msvc.customerproducts.models.dao.CustomerProductDao;
 import org.bank.ssalguerof.msvc.customerproducts.models.documents.CustomerProduct;
 import org.bank.ssalguerof.msvc.customerproducts.models.documents.Transaction;
+import org.bank.ssalguerof.msvc.customerproducts.models.reports.AvailableProduct;
+import org.bank.ssalguerof.msvc.customerproducts.models.reports.ReportAvailableProducts;
+import org.bank.ssalguerof.msvc.customerproducts.models.reports.ReportProducts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import static org.bank.ssalguerof.msvc.customerproducts.utils.Constantes.*;
+import static org.bank.ssalguerof.msvc.customerproducts.utils.Constantes.DESC_TARJCREDITO;
 
 /**
  * Implementación del servicio CustomerProductService que administra la información de
@@ -77,120 +52,112 @@ public class CustomerProductServiceImpl implements CustomerProductService {
 
   @Override
   public Mono<CustomerProduct> save(CustomerProduct customerProduct) {
-    //Validamos para persona natural:
-    //Un cliente personal solo puede tener un máximo de una cuenta de ahorro, una cuenta
-    //corriente o cuentas a plazo fijo.
-    if (customerProduct.getCodTipoCliente().equals(COD_TIPOPERSONA_PERS)) {
-      //validamos que el producto a asignar a cliente sea los productos permitido a cliente personal
-      if (!PRODUCTS_CLIENTE_PERSONAL.stream().anyMatch(codprod -> codprod.equals(
-          customerProduct.getCodProducto()))) {
-        return Mono.error(new RuntimeException("El producto a registrar no esta permitido a "
-          + "Persona Natural"));
-      } else {
-        //Validaciones para el caso de un Activo
-        if (customerProduct.getCodTipoProducto().equals(COD_TIPOPRODUCTO_ACTIVO)) {
 
-          //Un cliente personal solo puede tener un máximo de una cuenta de ahorro,
-          //una cuenta corriente o cuentas a plazo fijo.
-
-          return customerProductDao.findByClienteIdAndCodTipoClienteAndCodProductoIn(
-            customerProduct.getClienteId(), "1", PRODUCTS_CTA_PERSONAL)
-            .hasElements()
-            .flatMap(hasElement -> {
-              if (hasElement) {
-                // Ya existe un registro, devolver un Mono vacío o un error
-                return Mono.error(new RuntimeException("El cliente ya cuenta con el Producto con "
-                  + "el código de producto CTAAHO, CTACOR, CTAPLZ, CTAVIP"));
-              } else {
-
-                if (customerProduct.getCodProducto().equals(COD_CTAAHORROVIP)) {
-                  //validamos que el cliente tenga una tarjeta de crédito
-                  return customerProductDao.findByClienteIdAndCodProducto(
-                    customerProduct.getClienteId(),
-                      COD_TARJCREDITO).hasElements()
-                    .flatMap(hasElementCred -> {
-                      if (hasElementCred) {
-                        return customerProductDao.save(customerProduct);
-                      } else {
-                        // Si no cuenta con una tarjeta de crédito, devolver un Mono
-                        // vacío o un error
-                        return Mono.error(new RuntimeException("El cliente no cuenta "
-                                                          + "con una tarjeta de crédito"));
-                      }
-                    });
-                } else {
-                  return customerProductDao.save(customerProduct);
-                }
-
-              }
-            });
-        }
-        //para el caso de un pasivo
-        if (customerProduct.getCodTipoProducto().equals(COD_TIPOPRODUCTO_PASIVO)) {
-          //solo se permite un solo crédito Personal.
-          if (customerProduct.getCodProducto().equals(COD_CTOPERSONAL)) {
-            return customerProductDao.findByClienteIdAndCodProducto(customerProduct.getClienteId(),
-                COD_CTOPERSONAL)
-              .hasElements()
-              .flatMap(hasElement -> {
-                //si ya se tiene un credito personal
-                if (hasElement) {
-                  return Mono.error(new RuntimeException("Solo se permite un Crédito Personal"));
-                } else {
-                  return customerProductDao.save(customerProduct);
-                }
-              });
-          }
-          //para otros casos no se indica restricciones
-          return customerProductDao.save(customerProduct);
-        }
-      }
-    }
-    /*Validamos para persona Empresarial:*/
-    if (customerProduct.getCodTipoCliente().equals(COD_TIPOPERSONA_EMPR)) {
-      //validamos que el producto a asignar a cliente sea los productos permitido a cliente
-      //Empresarial donde se cumpliria lo siguiente:
-      //•Un cliente empresarial no puede tener una cuenta de ahorro o de plazo fijo,
-      //pero sí múltiples cuentas corrientes.(se validar)
-      if (!PRODUCTS_CLIENTE_EMPRESARIAL.stream().anyMatch(codprod ->
-           codprod.equals(customerProduct.getCodProducto()))) {
-        return Mono.error(new RuntimeException("El producto a registrar no esta permitido "
-          + "a Persona Empresarial"));
-      } else {
-        /*Validaciones para el caso de un Activo y Pasivos
-         * - No existe restricciones
-         * */
-
-        if (customerProduct.getCodProducto().equals(COD_CTAMYPE)) {
-          return customerProductDao.findByClienteIdAndCodTipoClienteAndCodProductoIn(
-            customerProduct.getClienteId(), customerProduct.getCodTipoCliente(),
-            Arrays.asList(COD_CTACORRIENTE, COD_TARJCREDITO))
-            .collectList()
-            .flatMap(customerProducts -> {
-              // Verificar si la lista de productos contiene ambos productos requeridos
-              boolean tieneCuentaCorriente = customerProducts.stream()
-                    .anyMatch(product -> product.getCodProducto().equals(COD_CTACORRIENTE));
-              boolean tieneTarjetaCredito = customerProducts.stream()
-                    .anyMatch(product -> product.getCodProducto().equals(COD_TARJCREDITO));
-                      if (tieneCuentaCorriente && tieneTarjetaCredito) {
-                        // El cliente tiene ambos productos requeridos
-                        return customerProductDao.save(customerProduct);
-                      } else {
-                        // El cliente no tiene algún producto requerido
-                        return Mono.error(new RuntimeException("El cliente no cumple con los "
-                          + "requisitos para tener una cuenta MYPE"));
-                      }
-            }
-            );
-
+    return validarDeudaVencida(customerProduct)
+      .flatMap(tieneDeudaVencida -> {
+        if (tieneDeudaVencida) {
+          return Mono.error(new RuntimeException("El cliente tiene una deuda vencida y no se tienen productos disponibles"));
         } else {
-          //para los otros productos existe requisitos
-          return customerProductDao.save(customerProduct);
-        }
-      }
+          // Validar el tipo de cliente
+          if (customerProduct.getCodTipoCliente().equals(COD_TIPOPERSONA_PERS)) {
+            // Validar si el producto está permitido para clientes personales
+            if (!PRODUCTS_CLIENTE_PERSONAL.contains(customerProduct.getCodProducto())) {
+              return Mono.error(new RuntimeException("El producto no está permitido para Persona Natural"));
+            }
 
+            // Validar el tipo de producto (Activo o Pasivo)
+            if (customerProduct.getCodTipoProducto().equals(COD_TIPOPRODUCTO_ACTIVO)) {
+              // Validar que solo tenga un máximo de una cuenta de ahorro, corriente o plazo fijo
+              return validatePersonalActiveProduct(customerProduct);
+            } else if (customerProduct.getCodTipoProducto().equals(COD_TIPOPRODUCTO_PASIVO)) {
+              // Validar que solo tenga un crédito personal
+              return validatePersonalPassiveProduct(customerProduct);
+            }
+          } else if (customerProduct.getCodTipoCliente().equals(COD_TIPOPERSONA_EMPR)) {
+            // Validar si el producto está permitido para clientes empresariales
+            if (!PRODUCTS_CLIENTE_EMPRESARIAL.contains(customerProduct.getCodProducto())) {
+              return Mono.error(new RuntimeException("El producto no está permitido para Persona Empresarial"));
+            }
+
+            // Validar el tipo de producto (Activo o Pasivo)
+            if (customerProduct.getCodProducto().equals(COD_CTAMYPE)) {
+              // Validar que tenga una cuenta corriente y una tarjeta de crédito
+              return validateBusinessMypeProduct(customerProduct);
+            }
+          }
+        }
+        return Mono.empty();
+      });
+
+  }
+
+  private Mono<CustomerProduct> validatePersonalActiveProduct(CustomerProduct customerProduct) {
+    // Validar que no tenga más de un producto activo permitido
+    return customerProductDao.findByClienteIdAndCodTipoClienteAndCodProductoIn(
+        customerProduct.getClienteId(), "1", PRODUCTS_CTA_PERSONAL)
+      .hasElements()
+      .flatMap(hasElement -> {
+        if (hasElement) {
+          return Mono.error(new RuntimeException("El cliente ya tiene un Producto Activo registrado"));
+        } else {
+          // Para CTAAHORROVIP, validar que tenga una tarjeta de crédito
+          if (customerProduct.getCodProducto().equals(COD_CTAAHORROVIP)) {
+            return validateCreditCardExistence(customerProduct);
+          } else {
+            return customerProductDao.save(customerProduct);
+          }
+        }
+      });
+  }
+
+  private Mono<CustomerProduct> validateCreditCardExistence(CustomerProduct customerProduct) {
+    // Validar que el cliente tenga una tarjeta de crédito
+    return customerProductDao.findByClienteIdAndCodProducto(customerProduct.getClienteId(), COD_TARJCREDITO)
+      .hasElements()
+      .flatMap(hasElement -> {
+        if (hasElement) {
+          return customerProductDao.save(customerProduct);
+        } else {
+          return Mono.error(new RuntimeException("El cliente no tiene una tarjeta de crédito"));
+        }
+      });
+  }
+
+  private Mono<CustomerProduct> validatePersonalPassiveProduct(CustomerProduct customerProduct) {
+    // Validar que solo tenga un crédito personal
+    if (customerProduct.getCodProducto().equals(COD_CTOPERSONAL)) {
+      return customerProductDao.findByClienteIdAndCodProducto(customerProduct.getClienteId(), COD_CTOPERSONAL)
+        .hasElements()
+        .flatMap(hasElement -> {
+          if (hasElement) {
+            return Mono.error(new RuntimeException("Solo se permite un Crédito Personal"));
+          } else {
+            return customerProductDao.save(customerProduct);
+          }
+        });
     }
-    return Mono.empty();
+
+    return customerProductDao.save(customerProduct); // Para otros productos, no hay restricciones
+  }
+
+  private Mono<CustomerProduct> validateBusinessMypeProduct(CustomerProduct customerProduct) {
+    // Validar que tenga una cuenta corriente y una tarjeta de crédito
+    return customerProductDao.findByClienteIdAndCodTipoClienteAndCodProductoIn(
+        customerProduct.getClienteId(), customerProduct.getCodTipoCliente(),
+        Arrays.asList(COD_CTACORRIENTE, COD_TARJCREDITO))
+      .collectList()
+      .flatMap(customerProducts -> {
+        boolean tieneCuentaCorriente = customerProducts.stream()
+            .anyMatch(product -> product.getCodProducto().equals(COD_CTACORRIENTE));
+        boolean tieneTarjetaCredito = customerProducts.stream()
+            .anyMatch(product -> product.getCodProducto().equals(COD_TARJCREDITO));
+
+        if (tieneCuentaCorriente && tieneTarjetaCredito) {
+          return customerProductDao.save(customerProduct);
+        } else {
+          return Mono.error(new RuntimeException("El cliente no cumple con los requisitos para tener una cuenta MYPE"));
+        }
+      });
   }
 
   @Override
@@ -396,35 +363,7 @@ public class CustomerProductServiceImpl implements CustomerProductService {
       });
   }
 
-  /**
-   * Obtiene el saldo del producto del cliente en función del tipo de producto.
-   *
-   *  @param customerProduct El objeto CustomerProduct del cual se desea obtener el saldo.
-   *  @return El saldo del producto.
-   *  @throws IllegalArgumentException Si el tipo de producto no es válido.
-   */
-  @Override
-  public Double getSaldoProductoCliente(CustomerProduct customerProduct) {
-    switch (customerProduct.getCodTipoProducto()) {
-      case COD_CTAAHORRO:
-        return customerProduct.getDatosCuentaAhorro().getSaldo();
-      case COD_CTACORRIENTE:
-        return customerProduct.getDatosCuentaCorriente().getSaldo();
-      case COD_CTAPLAZOFIJO:
-        return customerProduct.getDatosPlazoFijo().getMonto();
-      case COD_CTOEMPRESARIAL:
-        return customerProduct.getDatosCreditoEmpresarial().getSaldoPendiente();
-      case COD_CTOPERSONAL:
-        return customerProduct.getDatosCreditoPersonal().getSaldoPendiente();
-      case COD_TARJCREDITO:
-        return customerProduct.getDatosTarjetaCredito().getSaldoUtilizado();
-      default:
-        throw new IllegalArgumentException("Tipo de producto no válido");
-    }
-  }
-
-  @Override
-  public Boolean validarComisionTransaccion(CustomerProduct customerProduct,
+  private Boolean validarComisionTransaccion(CustomerProduct customerProduct,
                                             Transaction transaction) {
     Double montoTransferencia = calcularMontoTransferencia(customerProduct, transaction);
 
@@ -476,5 +415,175 @@ public class CustomerProductServiceImpl implements CustomerProductService {
     return null; // Indicar un error en la validación
   }
 
+  @Override
+  public Mono<ReportAvailableProducts> generateReportProductsCustomer(String clienteId, String codTipoCliente) {
+    CustomerProduct customerProduct = new CustomerProduct();
+    customerProduct.setClienteId(clienteId);
+    customerProduct.setCodTipoCliente(codTipoCliente);
+
+    return validarDeudaVencida(customerProduct)
+      .flatMap(tieneDeudaVencida -> {
+        if (tieneDeudaVencida) {
+          return Mono.error(new RuntimeException("El cliente tiene una deuda vencida y no se tienen productos disponibles"));
+        } else {
+          return generateReportCustomerProductos(customerProduct);
+        }
+      });
+
+  }
+
+  private Mono<Boolean> validarDeudaVencida(CustomerProduct customerProduct){
+    Mono<Boolean> tieneDeudaMono = Mono.empty();
+
+    if(customerProduct.getCodTipoCliente().equals(COD_TIPOPERSONA_PERS)){
+      //Consultamos si existe un pasivo para el cliente
+      Mono<List<CustomerProduct>> customerOverdueDebtProductsMono = customerProductDao.findByClienteIdAndCodTipoClienteAndCodProductoIn(
+          customerProduct.getClienteId(), customerProduct.getCodTipoCliente(), PASSIVE_PRODUCTS_PERSONAL)
+          .collectList();
+
+      tieneDeudaMono = customerOverdueDebtProductsMono
+        .switchIfEmpty(Mono.just(Collections.emptyList())) // Si el Mono está vacío, proporciona una lista vacía
+        .map(products -> {
+          return products.stream()
+            .anyMatch(customerProduct1 -> {
+              Boolean indDeudaVencida = false;
+              switch (customerProduct1.getCodProducto()) {
+                case COD_CTOPERSONAL:
+                  indDeudaVencida = IND_TIENE_DEUDA.equals(customerProduct1.getDatosCreditoPersonal().getIndVencido());
+                  break;
+                case COD_TARJCREDITO:
+                  indDeudaVencida = IND_TIENE_DEUDA.equals(customerProduct1.getDatosTarjetaCredito().getIndVencido());
+                  break;
+              }
+              return indDeudaVencida;
+            });
+        });
+
+
+    }else if(customerProduct.getCodTipoCliente().equals(COD_TIPOPERSONA_EMPR)){
+      //Consultamos si existe un pasivo para el cliente
+      Mono<List<CustomerProduct>> customerOverdueDebtProductsMono = customerProductDao.findByClienteIdAndCodTipoClienteAndCodProductoIn(
+          customerProduct.getClienteId(), customerProduct.getCodTipoCliente(), PASSIVE_PRODUCTS_EMPRESARIAL)
+        .collectList();
+
+      tieneDeudaMono = customerOverdueDebtProductsMono
+        .switchIfEmpty(Mono.just(Collections.emptyList())) // Si el Mono está vacío, proporciona una lista vacía
+        .map(products -> {
+          return products.stream()
+            .anyMatch(customerProduct1 -> {
+              Boolean indDeudaVencida = false;
+              switch (customerProduct1.getCodProducto()) {
+                case COD_CTOEMPRESARIAL:
+                  indDeudaVencida = IND_TIENE_DEUDA.equals(customerProduct1.getDatosCreditoEmpresarial().getIndVencido());
+                  break;
+                case COD_TARJCREDITO:
+                  indDeudaVencida = IND_TIENE_DEUDA.equals(customerProduct1.getDatosTarjetaCredito().getIndVencido());
+                  break;
+              }
+              return indDeudaVencida;
+            });
+        });
+
+    }
+
+    return tieneDeudaMono;
+
+  }
+
+  public Mono<ReportAvailableProducts> generateReportCustomerProductos(CustomerProduct customerProduct){
+
+    if(COD_TIPOPERSONA_PERS.equals(customerProduct.getCodTipoCliente())){
+      List<AvailableProduct> availableProductList = new ArrayList<>();
+      //validamos si puede tener una cuenta de Ahorro, Cuenta Corriente o Cuenta Plazo
+      return customerProductDao.findByClienteIdAndCodTipoClienteAndCodProductoIn(
+          customerProduct.getClienteId(), customerProduct.getCodTipoCliente(), PRODUCTS_CTA_PERSONAL)
+        .hasElements()
+        .flatMap(hasElement -> {
+          if (hasElement) {
+            availableProductList.add(new AvailableProduct(COD_CTAAHORRO, DESC_CTAAHORRO, "0"));
+            availableProductList.add(new AvailableProduct(COD_CTACORRIENTE, DESC_CTACORRIENTE, "0"));
+            availableProductList.add(new AvailableProduct(COD_CTAPLAZOFIJO, DESC_CTAPLAZOFIJO, "0"));
+            availableProductList.add(new AvailableProduct(COD_CTAAHORROVIP, DESC_CTAAHORROVIP, "0"));
+          } else {
+            availableProductList.add(new AvailableProduct(COD_CTAAHORRO, DESC_CTAAHORRO, "1"));
+            availableProductList.add(new AvailableProduct(COD_CTACORRIENTE, DESC_CTACORRIENTE, "1"));
+            availableProductList.add(new AvailableProduct(COD_CTAPLAZOFIJO, DESC_CTAPLAZOFIJO, "1"));
+
+            //Validamos si se puede tener una cuenta VIP
+            return customerProductDao.findByClienteIdAndCodProducto(customerProduct.getClienteId(), COD_TARJCREDITO)
+              .hasElements()
+              .flatMap(hasElementVip -> {
+                if (hasElementVip) {
+                  availableProductList.add(new AvailableProduct(COD_CTAAHORROVIP, DESC_CTAAHORROVIP, "1"));
+                } else {
+                  availableProductList.add(new AvailableProduct(COD_CTAAHORROVIP, DESC_CTAAHORROVIP, "0"));
+                }
+
+                //Validamos si puede un crédito personal
+                return customerProductDao.findByClienteIdAndCodProducto(customerProduct.getClienteId(), COD_CTOPERSONAL)
+                  .hasElements()
+                  .flatMap(hasPersonalCredit -> {
+                    if (hasPersonalCredit) {
+                      availableProductList.add(new AvailableProduct(COD_CTOPERSONAL, DESC_CTOPERSONAL, "0"));
+                    } else {
+                      availableProductList.add(new AvailableProduct(COD_CTOPERSONAL, DESC_CTOPERSONAL, "1"));
+                    }
+
+                    // Validamos el producto tarjeta de crédito
+                    availableProductList.add(new AvailableProduct(COD_TARJCREDITO, DESC_TARJCREDITO, "1"));
+
+                    // Creamos y retornamos el objeto ReportAvailableProducts
+                    ReportAvailableProducts reportAvailableProducts = new ReportAvailableProducts();
+                    reportAvailableProducts.setClienteId(customerProduct.getClienteId());
+                    reportAvailableProducts.setAvailableProductList(availableProductList);
+
+                    return Mono.just(reportAvailableProducts);
+                  });
+              });
+          }
+
+          // Creamos y retornamos el objeto ReportAvailableProducts
+          ReportAvailableProducts reportAvailableProducts = new ReportAvailableProducts();
+          reportAvailableProducts.setClienteId(customerProduct.getClienteId());
+          reportAvailableProducts.setAvailableProductList(availableProductList);
+
+          return Mono.just(reportAvailableProducts);
+        });
+
+    } else if (COD_TIPOPERSONA_EMPR.equals(customerProduct.getCodTipoCliente())) {
+      List<AvailableProduct> availableProductList = new ArrayList<>();
+      //se puede tener varias cuentas corrientes
+      availableProductList.add(new AvailableProduct(COD_CTACORRIENTE, DESC_CTACORRIENTE, "1"));
+      //validamos si credito empresarial
+      availableProductList.add(new AvailableProduct(COD_CTOEMPRESARIAL, DESC_CTOEMPRESARIAL, "1"));
+      //validamos tarjeta de crédito
+      availableProductList.add(new AvailableProduct(COD_TARJCREDITO, DESC_TARJCREDITO, "1"));
+
+      //validamos cuenta MYPE
+      return customerProductDao.findByClienteIdAndCodTipoClienteAndCodProductoIn(
+        customerProduct.getClienteId(), customerProduct.getCodTipoCliente(),
+        Arrays.asList(COD_CTACORRIENTE, COD_TARJCREDITO))
+        .collectList()
+        .flatMap(customerProducts -> {
+          // Validar que se tenga ambos productos
+          // Verificar si los productos contienen COD_CTACORRIENTE y COD_TARJCREDITO
+          boolean containsCTACorriente = customerProducts.stream()
+            .anyMatch(product -> COD_CTACORRIENTE.equals(product.getCodProducto()));
+          boolean containsTarjetaCredito = customerProducts.stream()
+            .anyMatch(product -> COD_TARJCREDITO.equals(product.getCodProducto()));
+
+          if (containsCTACorriente && containsTarjetaCredito) {
+            availableProductList.add(new AvailableProduct(COD_CTAMYPE, DESC_CTAMYPE, "1"));
+          } else {
+            availableProductList.add(new AvailableProduct(COD_CTAMYPE, DESC_CTAMYPE, "0"));
+          }
+          ReportAvailableProducts reportAvailableProducts = new ReportAvailableProducts();
+          reportAvailableProducts.setClienteId(customerProduct.getClienteId());
+          reportAvailableProducts.setAvailableProductList(availableProductList);
+          return Mono.just(reportAvailableProducts);
+        });
+    }
+    return Mono.empty();
+  }
 
 }

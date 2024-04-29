@@ -15,4 +15,6 @@ public interface ReportProductsService {
 
   public Mono<ReportProductCommission> generateReportCommission(String clienteId,
                                                                 LocalDate fechaReporte);
+
+  public Mono<ReportProducts> generateReportProductsCustomer(String clienteId, String codTipoCliente);
 }

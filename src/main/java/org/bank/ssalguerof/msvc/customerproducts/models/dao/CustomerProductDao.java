@@ -20,5 +20,9 @@ public interface CustomerProductDao extends ReactiveMongoRepository<CustomerProd
   Flux<CustomerProduct> findByClienteIdAndCodTipoClienteAndCodProductoIn(
                         String clienteId, String codTipoCliente, List<String> codProductos);
 
+  Mono<CustomerProduct> findByClienteIdAndNumCuenta(String clienteId, String numCuenta);
+
+  Flux<CustomerProduct> findByClienteIdAndNumCuentaIn(String clienteId, List<String> numCuentas);
+
   Mono<CustomerProduct> findByNumCuenta(String numCuenta);
 }

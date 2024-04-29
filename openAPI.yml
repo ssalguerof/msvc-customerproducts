@@ -1,0 +1,385 @@
+openapi: 3.0.3
+info:
+  title: Customer Products API
+  description: API for managing customer products and generating reports
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080/api
+paths:
+  /api/customerProduct:
+    get:
+      summary: Retrieve all customer products
+      operationId: findAllProducts
+      responses:
+        '200':
+          description: List of customer products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CustomerProduct'
+    post:
+      summary: Create a new customer product
+      operationId: createProduct
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerProduct'
+      responses:
+        '200':
+          description: Created customer product
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerProduct'
+  /api/customerProduct/{id}:
+    get:
+      summary: Retrieve a customer product by ID
+      operationId: findProductById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Customer product found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerProduct'
+    put:
+      summary: Update a customer product
+      operationId: updateProduct
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerProduct'
+      responses:
+        '200':
+          description: Updated customer product
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerProduct'
+  /api/customerProduct/cuenta/{numCuenta}:
+    get:
+      summary: Retrieve a customer product by account number
+      operationId: findProductByAccountNumber
+      parameters:
+        - name: numCuenta
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Customer product found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerProduct'
+  /api/customerProduct/transaction/{idCustomerProd}:
+    put:
+      summary: Update a product's transaction
+      operationId: updateProductTransaction
+      parameters:
+        - name: idCustomerProd
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Transaction'
+      responses:
+        '200':
+          description: Updated customer product
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerProduct'
+  /api/customerProduct/transference/{ctaOrigen}/{ctaDestino}:
+    put:
+      summary: Transfer between customer products
+      operationId: transferProductTransaction
+      parameters:
+        - name: ctaOrigen
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: ctaDestino
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Transaction'
+      responses:
+        '200':
+          description: Transferred between products successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerProduct'
+  /api/customerProduct/reporte/{clienteId}:
+    get:
+      summary: Generate average report for a client
+      operationId: generateReportAverage
+      parameters:
+        - name: clienteId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Average report generated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportProducts'
+  /api/customerProduct/reportcommission/{clienteId}:
+    get:
+      summary: Generate commission report for a client
+      operationId: generateReportCommission
+      parameters:
+        - name: clienteId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Commission report generated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportProductCommission'
+components:
+  schemas:
+    CustomerProduct:
+      type: object
+      properties:
+        id:
+          type: string
+        numCuenta:
+          type: string
+        numTarjeta:
+          type: string
+        clienteId:
+          type: string
+        codTipoCliente:
+          type: string
+        codProducto:
+          type: string
+        nomProducto:
+          type: string
+        codTipoProducto:
+          type: string
+        descTipoProducto:
+          type: string
+        fecRegistroProducto:
+          type: string
+          format: date
+        datosCuentaAhorro:
+          $ref: '#/components/schemas/AccountData'
+        datosCuentaCorriente:
+          $ref: '#/components/schemas/AccountData'
+        datosPlazoFijo:
+          $ref: '#/components/schemas/CertificateDepositData'
+        datosCreditoEmpresarial:
+          $ref: '#/components/schemas/CreditData'
+        datosCreditoPersonal:
+          $ref: '#/components/schemas/CreditData'
+        datosTarjetaCredito:
+          $ref: '#/components/schemas/CreditCardData'
+        listaTitulares:
+          type: array
+          items:
+            $ref: '#/components/schemas/Customer'
+        listaTransactions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Transaction'
+    Customer:
+      type: object
+      properties:
+        id:
+          type: string
+        codTipoCliente:
+          type: string
+        descTipoCliente:
+          type: string
+        nombre:
+          type: string
+        apePaterno:
+          type: string
+        apeMaterno:
+          type: string
+        codTipoDocumento:
+          type: string
+        descTipoDocumento:
+          type: string
+        numDocumento:
+          type: string
+        email:
+          type: string
+        telefono:
+          type: string
+        fecRegistro:
+          type: string
+          format: date
+        indFirmanteAuto:
+          type: string
+      required:
+        - id
+        - codTipoCliente
+        - descTipoCliente
+        - nombre
+        - apePaterno
+        - apeMaterno
+        - codTipoDocumento
+        - descTipoDocumento
+        - numDocumento
+        - email
+        - telefono
+        - fecRegistro
+    AccountData:
+      type: object
+      properties:
+        saldo:
+          type: number
+        numMovRealizados:
+          type: integer
+    CertificateDepositData:
+      type: object
+      properties:
+        monto:
+          type: number
+        fecVencimiento:
+          type: string
+          format: date
+    CreditData:
+      type: object
+      properties:
+        montoAprobado:
+          type: number
+        saldoPendiente:
+          type: number
+        cuotasPagadas:
+          type: integer
+        cuotasTotales:
+          type: integer
+    CreditCardData:
+      type: object
+      properties:
+        limiteCredito:
+          type: number
+        saldoUtilizado:
+          type: number
+        fechaCorte:
+          type: string
+          format: date
+        fechaVencimiento:
+          type: string
+          format: date
+    Transaction:
+      type: object
+      properties:
+        codTipoMovimiento:
+          type: string
+        descTipoMovimiento:
+          type: string
+        monto:
+          type: number
+        fecRegistro:
+          type: string
+          format: date
+        codTransferencia:
+          type: string
+        desTransferencia:
+          type: string
+        indOrigenTransaccion:
+          type: string
+    ReportProducts:
+      type: object
+      properties:
+        clienteId:
+          type: string
+        listProductsAverage:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductAverage'
+    ProductAverage:
+      type: object
+      properties:
+        codProducto:
+          type: string
+        nomProducto:
+          type: string
+        codTipoProducto:
+          type: string
+        descTipoProducto:
+          type: string
+        periodo:
+          type: string
+        monthlyAverageReportList:
+          type: array
+          items:
+            $ref: '#/components/schemas/MonthlyAverageReport'
+    MonthlyAverageReport:
+      type: object
+      properties:
+        dayOfMonth:
+          type: integer
+        saldoPromedio:
+          type: number
+    ReportProductCommission:
+      type: object
+      properties:
+        codProducto:
+          type: string
+        nomProducto:
+          type: string
+        codTipoProducto:
+          type: string
+        descTipoProducto:
+          type: string
+        commissionList:
+          type: array
+          items:
+            $ref: '#/components/schemas/Commission'
+    Commission:
+      type: object
+      properties:
+        codTipoMovimiento:
+          type: string
+        descTipoMovimiento:
+          type: string
+        monto:
+          type: number
+        codTransferencia:
+          type: string
+        desTransferencia:
+          type: string

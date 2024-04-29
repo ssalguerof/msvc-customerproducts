@@ -2,6 +2,8 @@ package org.bank.ssalguerof.msvc.customerproducts.models.services;
 
 import org.bank.ssalguerof.msvc.customerproducts.models.documents.CustomerProduct;
 import org.bank.ssalguerof.msvc.customerproducts.models.documents.Transaction;
+import org.bank.ssalguerof.msvc.customerproducts.models.reports.ReportAvailableProducts;
+import org.bank.ssalguerof.msvc.customerproducts.models.reports.ReportProducts;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -27,10 +29,5 @@ public interface CustomerProductService {
   public Mono<CustomerProduct> transferProductTransaction(String numCtaOrigen,
                                               String numCtaDestino, Transaction transaction);
 
-  public Double getSaldoProductoCliente(CustomerProduct customerProduct);
-
-  public Boolean validarComisionTransaccion(CustomerProduct customerProduct,
-                                            Transaction transaction);
-
-
+  public Mono<ReportAvailableProducts> generateReportProductsCustomer(String clienteId, String codTipoCliente);
 }

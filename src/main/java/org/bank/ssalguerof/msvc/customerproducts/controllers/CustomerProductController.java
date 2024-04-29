@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.Date;
 import org.bank.ssalguerof.msvc.customerproducts.models.documents.CustomerProduct;
 import org.bank.ssalguerof.msvc.customerproducts.models.documents.Transaction;
+import org.bank.ssalguerof.msvc.customerproducts.models.reports.ReportAvailableProducts;
 import org.bank.ssalguerof.msvc.customerproducts.models.reports.ReportProductCommission;
 import org.bank.ssalguerof.msvc.customerproducts.models.reports.ReportProducts;
 import org.bank.ssalguerof.msvc.customerproducts.models.services.CustomerProductService;
@@ -36,6 +37,12 @@ public class CustomerProductController {
   @GetMapping
   public Flux<CustomerProduct> findAll() {
     return customerProductService.findAll();
+  }
+
+
+  @GetMapping("/cliente/{clienteId}")
+  public Flux<CustomerProduct> findByClienteId(@PathVariable String clienteId) {
+    return customerProductService.findbyClienteId(clienteId);
   }
 
   @GetMapping("/{id}")
@@ -102,4 +109,11 @@ public class CustomerProductController {
     LocalDate currentDate = LocalDate.now();
     return reportProductsService.generateReportCommission(clienteId, currentDate);
   }
+
+  @GetMapping("/reportcustomerproducts/{clienteId}/{codTipoCliente}")
+  public Mono<ReportAvailableProducts> generateReportProductsCustomer(@PathVariable String clienteId, @PathVariable String codTipoCliente) {
+    return customerProductService.generateReportProductsCustomer(clienteId, codTipoCliente);
+  }
+
+
 }

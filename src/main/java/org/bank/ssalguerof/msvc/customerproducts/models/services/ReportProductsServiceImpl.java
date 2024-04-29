@@ -1,9 +1,5 @@
 package org.bank.ssalguerof.msvc.customerproducts.models.services;
 
-import static org.bank.ssalguerof.msvc.customerproducts.utils.Constantes.COD_MOV_DEPOCTA;
-import static org.bank.ssalguerof.msvc.customerproducts.utils.Constantes.COD_MOV_RETICTA;
-import static org.bank.ssalguerof.msvc.customerproducts.utils.Constantes.COD_TRANS_COBRO_COMISION;
-
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -25,6 +21,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import static org.bank.ssalguerof.msvc.customerproducts.utils.Constantes.*;
 
 /**
  * Implementación del servicio para generar informes de productos.
@@ -200,5 +198,16 @@ public class ReportProductsServiceImpl implements ReportProductsService {
     return commissions;
   }
 
+  @Override
+  public Mono<ReportProducts> generateReportProductsCustomer(String clienteId, String codTipoCliente) {
+    if(COD_TIPOPERSONA_PERS.equals(codTipoCliente)){
+      //validamos si puede tener una cuenta de Ahorro, Cuenta Corriente o Cuenta Plazo
+
+
+    } else if (COD_TIPOPERSONA_EMPR.equals(codTipoCliente)) {
+
+    }
+    return null;
+  }
 
 }

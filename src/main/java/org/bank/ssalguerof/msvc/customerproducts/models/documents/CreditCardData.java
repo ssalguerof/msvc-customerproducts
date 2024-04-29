@@ -17,7 +17,7 @@ public class CreditCardData {
   public Double saldoUtilizado;     // Saldo actualmente utilizado en la tarjeta
   public Date fechaCorte;           // Fecha de corte para el ciclo de facturación
   public Date fechaVencimiento;     // Fecha de vencimiento de la tarjeta
-
+  private String indVencido;
   // Métodos getter y setter generados automáticamente por Lombok
 
 }

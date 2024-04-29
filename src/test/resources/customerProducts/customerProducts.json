@@ -1,0 +1,67 @@
+{
+  "id": "6626c66066190f56fa0d543b",
+  "numCuenta": "12376567890",
+  "numTarjeta": "9876543210987654",
+  "clienteId": "6626c66066190f56fa0d5439",
+  "codTipoCliente": "1",
+  "codProducto": "CTAAHO",
+  "nomProducto": "Cuenta de Ahorro",
+  "codTipoProducto": "A",
+  "descTipoProducto": "Activo",
+  "fecRegistroProducto": "2024-04-22T20:19:44.635+00:00",
+  "datosCuentaAhorro": {
+    "saldo": 9000.0,
+    "numMovRealizados": 3
+  },
+  "datosCuentaCorriente": null,
+  "datosPlazoFijo": null,
+  "datosCreditoEmpresarial": null,
+  "datosCreditoPersonal": null,
+  "datosTarjetaCredito": null,
+  "listaTitulares": [
+    {
+      "id": "6626c66066190f56fa0d5439",
+      "codTipoCliente": null,
+      "descTipoCliente": null,
+      "nombre": "Juan",
+      "apePaterno": "Pérez",
+      "apeMaterno": "García",
+      "codTipoDocumento": "1",
+      "descTipoDocumento": "DNI",
+      "numDocumento": "12345678",
+      "email": "juan@example.com",
+      "telefono": null,
+      "fecRegistro": null,
+      "indFirmanteAuto": "1"
+    }
+  ],
+  "listaTransactions": [
+    {
+      "codTipoMovimiento": "DEPCTA",
+      "descTipoMovimiento": "DEPOSITO CUENTA",
+      "monto": 5000.0,
+      "fecRegistro": "2024-04-22T20:19:44.635+00:00",
+      "codTransferencia": "TRDEPBAN",
+      "desTransferencia": "Depósito en banco",
+      "indOrigenTransaccion": "1"
+    },
+    {
+      "codTipoMovimiento": "DEPCTA",
+      "descTipoMovimiento": "DEPOSITO CUENTA",
+      "monto": 5000.0,
+      "fecRegistro": "2024-04-22T20:19:44.635+00:00",
+      "codTransferencia": "TRDEPCAJ",
+      "desTransferencia": "Depósito en cajero automático",
+      "indOrigenTransaccion": "1"
+    },
+    {
+      "codTipoMovimiento": "RETCTA",
+      "descTipoMovimiento": "RETIRO CUENTA",
+      "monto": 1000.0,
+      "fecRegistro": "2024-04-22T20:19:44.635+00:00",
+      "codTransferencia": "TRBANCTA",
+      "desTransferencia": "Transferencia bancaria entre cuentas",
+      "indOrigenTransaccion": "1"
+    }
+  ]
+}
