@@ -9,6 +9,10 @@ import reactor.core.publisher.Mono;
 
 public interface CustomerCardService {
   public Flux<CustomerCard> findAll();
+  public Mono<CustomerCard> findById(String idCard);
+
+  public Mono<CustomerCard> findByNumTarjeta(String numTarjeta);
+
   public Mono<CustomerCard> save(CustomerCard customerCard);
 
   public Mono<CustomerCard> addTransactionCard(String idCard, TransactionCard transactionCard);

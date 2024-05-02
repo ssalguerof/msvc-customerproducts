@@ -1,0 +1,23 @@
+server:
+  port: ${PORT:8003}
+spring:
+  data:
+    mongodb:
+      host: localhost                  # Dirección del servidor MongoDB
+      port: 27017                      # Puerto del servidor MongoDB
+      database: bankingdb         # Nombre de la base de datos
+  kafka:
+    bootstrap-servers: localhost:9092  # Lista de servidores de Kafka
+    consumer:
+      group-id: banking-group  # Identificador del grupo de consumidores
+      auto-offset-reset: earliest  # Configuración de reinicio automático del offset
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer  # Deserializador de claves
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer  # Deserializador de valores
+      auto.offset.reset: "earliest"
+      topics: # Lista de temas y sus controladores correspondientes
+        - name: "yanki-topic"              # Nombre del tema
+          handler: "org.bank.ssalguerof.msvc.customerproducts.models.services.TransactionYankiServiceImpl" # Clase que maneja los mensajes de este tema
+
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer  # Serializador de claves
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer  # Serializador de valores

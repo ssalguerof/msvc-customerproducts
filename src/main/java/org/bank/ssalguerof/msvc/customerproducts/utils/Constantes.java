@@ -79,6 +79,8 @@ public class Constantes {
   public static final String COD_TRANS_COBRO_COMISION = "TRCOBCOM";
   public static final String COD_TRANS_TARJETA_RETIRO = "TRTARRET";
   public static final String COD_TRANS_TARJETA_PAGO = "TRTARPAG";
+  public static final String COD_TRANS_YAPE_PAGO = "TRYAPPAG";
+  public static final String COD_TRANS_YAPE_DEPO = "TRYAPDEP";
 
   //Descripcion de Transferencias
   public static final String DES_TRANS_DEPOSITO_BANCO = "Depósito en banco";
@@ -89,11 +91,16 @@ public class Constantes {
   public static final String DES_TRANS_COBRO_COMISION = "Cobro de comisión";
   public static final String DES_TRANS_TARJETA_RETIRO = "Retiro con Tarjeta";
   public static final String DES_TRANS_TARJETA_PAGO = "Pago con Tarjeta";
+  public static final String DES_TRANS_YAPE_PAGO = "Pago con Yape";
+  public static final String DES_TRANS_YAPE_DEPO = "Deposito con Yape";
 
   //Código Transacciones Tarjeta
   public static final String COD_TRANS_TARJ_COMPRA = "TRANSCOMPTARJ";
   public static final String COD_TRANS_TARJ_RETIRO = "TRANSRETITARJ";
   public static final String COD_TRANS_TARJ_PAGO = "TRANSPAGOTARJ";
+
+  public static final String COD_TRANS_TARJ_RECIBIR_YAPE = "TRANSRECYAPTARJ";
+  public static final String COD_TRANS_TARJ_ENVIAR_YAPE = "TRANSENVYAPTARJ";
   //Descripción Transacciones con Tarjeta
   public static final String DES_TRANS_TARJ_COMPRA = "Compra con Tarjeta";
   public static final String DES_TRANS_TARJ_RETIRO = "Retiro con Tarjeta";

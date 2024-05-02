@@ -41,7 +41,17 @@ public class CustomerCardServiceImpl implements CustomerCardService {
     return customerCardDao.findAll();
   }
 
-  @Override
+    @Override
+    public Mono<CustomerCard> findById(String idCard) {
+        return customerCardDao.findById(idCard);
+    }
+
+    @Override
+    public Mono<CustomerCard> findByNumTarjeta(String numTarjeta) {
+        return customerCardDao.findByNumTarjeta(numTarjeta);
+    }
+
+    @Override
   public Mono<CustomerCard> save(CustomerCard customerCard) {
 
     return customerProductDao.findByClienteIdAndNumCuenta(customerCard.getClienteId(),
@@ -123,6 +133,27 @@ public class CustomerCardServiceImpl implements CustomerCardService {
                 return customerCardDao.save(customerCard);
               })
               .onErrorResume(error -> processNextAccount(customerCard, transactionCard));
+          case COD_TRANS_TARJ_ENVIAR_YAPE:
+              // Lógica para procesar un pago
+              Transaction transaction_en_yape = new Transaction(COD_MOV_RETICTA, DESC_MOV_RETICTA, transactionCard.getMonto(),
+                      transactionCard.getFecha(), COD_TRANS_YAPE_PAGO, DES_TRANS_YAPE_PAGO, IND_ORIGEN_TRANS_SI);
+
+              return customerProductService.updateProductTransaction(customerProduct.getId(), transaction_en_yape)
+                      .flatMap(customerProduct1 -> {
+                          customerCard.getTransactionCardList().add(transactionCard);
+                          return customerCardDao.save(customerCard);
+                      });
+            case COD_TRANS_TARJ_RECIBIR_YAPE:
+                // Lógica para procesar un pago
+                Transaction transaction_rec_yape = new Transaction(COD_MOV_DEPOCTA, DESC_MOV_DEPOCTA, transactionCard.getMonto(),
+                        transactionCard.getFecha(), COD_TRANS_YAPE_DEPO, DES_TRANS_YAPE_DEPO, IND_ORIGEN_TRANS_NO);
+
+                return customerProductService.updateProductTransaction(customerProduct.getId(), transaction_rec_yape)
+                        .flatMap(customerProduct1 -> {
+                            customerCard.getTransactionCardList().add(transactionCard);
+                            return customerCardDao.save(customerCard);
+                        });
+
           default:
             return Mono.error(new RuntimeException("Tipo de transacción no válido"));
         }
